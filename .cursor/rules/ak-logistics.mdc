@@ -1,0 +1,34 @@
+---
+description: AK Logistics website conventions
+alwaysApply: true
+---
+
+# AK Logistics website
+
+Static marketing site: plain HTML, CSS and JavaScript. No framework and no build step.
+`npm run dev` only starts a local file server (`serve`). Do not add React, Vite, Tailwind
+or a bundler unless the user asks for it.
+
+## Files
+- `index.html`: landing page. New pages go next to it (for example `about.html`, `services.html`)
+  and reuse the same header, footer, `css/style.css` and `js/main.js`.
+- `css/style.css`: all styles. Later blocks override earlier ones, so add changes at the end of the
+  section they belong to, or at the end of the file.
+- `js/main.js`: each feature is its own self-contained IIFE that returns early if its elements are missing.
+- `assets/images`, `assets/icons`: images and SVGs. Use relative paths (`assets/...`), never absolute `/assets/...`.
+
+## Design tokens
+- Fonts: Nunito Sans (headings, 400–800), Source Sans 3 (body, 400/500/600), from Google Fonts.
+- Orange: `#fd5202` (also `--orange: #ff5a0a`). Small brand triangle next to eyebrows is always orange.
+- Text: titles `#272727`, descriptions `#464646`, eyebrows `#4E4E4E`, secondary `#606060`.
+- Cards `#f6f6f6`, dark sections `#262626`, footer `#1b1b1b`, dividers `#CDCDCD`.
+- Container: max-width 1440px, 24px side gutter.
+- Section spacing: 136px bottom padding on desktop, 88px on mobile.
+- Buttons are pills (`border-radius: 999px`).
+
+## Rules
+- Must stay responsive: check desktop (1440px), tablet (~768px) and phone (390px), no horizontal scroll.
+- Respect `prefers-reduced-motion` for every animation.
+- Hide/show UI with classes (for example `.is-hidden`), not the `hidden` attribute.
+- Forms are not connected to a backend yet; look for `TODO` comments in `js/main.js`.
+- Placeholder content is marked with HTML comments in `index.html`.
