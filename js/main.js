@@ -910,3 +910,167 @@
     new IntersectionObserver(function (entries) { if (entries[0].isIntersecting) play(); else pause(); }).observe(stage);
   } else play();
 })();
+
+/* ---------- Solutions rail: pinned section; heading squashes away, then cards slide right to left ---------- */
+(function () {
+  'use strict';
+  var rail = document.querySelector('.sol-rail');
+  if (!rail) return;
+  var pin = rail.querySelector('.sol-rail-pin');
+  var head = rail.querySelector('.sol-rail-head');
+  var viewport = rail.querySelector('.sol-rail-viewport');
+  var track = rail.querySelector('.sol-rail-track');
+  if (!pin || !head || !viewport || !track) return;
+
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var headH = 0, squash = 0, travel = 0, top = 0, padTop = 0, ticking = false;
+
+  var clamp = function (v) { return v < 0 ? 0 : v > 1 ? 1 : v; };
+  var ease = function (t) { return t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; };
+
+  function reset() {
+    rail.classList.remove('is-pinned');
+    rail.style.height = '';
+    pin.style.height = '';
+    track.style.transform = '';
+  }
+
+  // Measure everything with the heading at full size, then fix the pin's height so it stays put while the heading shrinks.
+  // The section gets taller by the squash distance plus the row's sideways travel, which is how long it stays pinned
+  function measure() {
+    reset();
+    if (reduce.matches) return;
+    var cs = getComputedStyle(rail);
+    top = parseFloat(cs.getPropertyValue('--sol-top')) || 0;
+    padTop = parseFloat(cs.paddingTop) || 0;
+    headH = head.offsetHeight;
+    squash = Math.max(headH * 1.4, 240);
+    travel = Math.max(0, track.scrollWidth - viewport.clientWidth);
+    var pinH = pin.offsetHeight;
+    pin.style.height = pinH + 'px';
+    rail.style.height = (padTop + pinH + squash + travel + (parseFloat(cs.paddingBottom) || 0)) + 'px';
+    rail.classList.add('is-pinned');
+    update();
+  }
+
+  function update() {
+    ticking = false;
+    if (reduce.matches) return;
+    // How far the page has scrolled since the pin stuck under the header
+    var d = top - rail.getBoundingClientRect().top - padTop;
+    var e = ease(clamp(d / squash));
+    rail.style.setProperty('--sol-head', (headH * (1 - e)).toFixed(1) + 'px');
+    rail.style.setProperty('--sol-head-scale', (1 - .55 * e).toFixed(3));
+    rail.style.setProperty('--sol-head-fade', clamp(1 - e * 1.25).toFixed(3));
+    var x = Math.min(Math.max(d - squash, 0), travel);
+    track.style.transform = 'translate3d(' + (-x).toFixed(1) + 'px, 0, 0)';
+  }
+
+  function onScroll() {
+    if (!ticking) { ticking = true; requestAnimationFrame(update); }
+  }
+
+  var resizeTimer;
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', function () { clearTimeout(resizeTimer); resizeTimer = setTimeout(measure, 150); });
+  if (reduce.addEventListener) reduce.addEventListener('change', measure);
+  window.addEventListener('load', measure);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+  measure();
+})();
+
+/* ---------- How it works: orange marker runs down the dashed line, lighting each step in turn, then starts over ---------- */
+(function () {
+  'use strict';
+  var list = document.getElementById('hiwSteps');
+  if (!list || !window.SVGElement) return;
+  var steps = [].slice.call(list.querySelectorAll('.hiw-step'));
+  var nums = steps.map(function (s) { return s.querySelector('.hiw-num'); });
+  if (steps.length < 2 || nums.indexOf(null) !== -1) return;
+
+  var NS = 'http://www.w3.org/2000/svg';
+  var HOLD = 2000;     // ms a step stays lit before the marker leaves it
+  var TRAVEL = 1200;   // ms for the marker to run to the next step
+  var GAP = 6;         // px between a circle edge and where the marker starts / stops
+
+  var svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('class', 'hiw-line');
+  svg.setAttribute('aria-hidden', 'true');
+  var track = document.createElementNS(NS, 'line');
+  track.setAttribute('class', 'hiw-line-track');
+  var dot = document.createElementNS(NS, 'rect');
+  dot.setAttribute('class', 'hiw-line-dot');
+  dot.setAttribute('width', 4); dot.setAttribute('height', 8);
+  dot.setAttribute('opacity', 0);
+  svg.appendChild(track); svg.appendChild(dot);
+  list.insertBefore(svg, list.firstChild);
+
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var centres = [], x = 0, r = 0;
+  var active = 0, phase = 'hold', phaseStart = 0, raf = 0, visible = false;
+
+  // Circle centres relative to the list; the dashed line runs from the first to the last
+  function measure() {
+    var box = list.getBoundingClientRect();
+    centres = nums.map(function (n) {
+      var b = n.getBoundingClientRect();
+      x = b.left + b.width / 2 - box.left;
+      r = b.height / 2;
+      return b.top + b.height / 2 - box.top;
+    });
+    track.setAttribute('x1', x); track.setAttribute('x2', x);
+    track.setAttribute('y1', centres[0]); track.setAttribute('y2', centres[centres.length - 1]);
+    dot.setAttribute('x', x - 2);
+  }
+
+  function setActive(i) {
+    active = i;
+    steps.forEach(function (s, k) { s.classList.toggle('is-active', k === i); });
+  }
+
+  var ease = function (t) { return t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; };
+
+  function frame(now) {
+    raf = 0;
+    if (!phaseStart) phaseStart = now;
+    var t = now - phaseStart;
+    if (phase === 'hold') {
+      dot.setAttribute('opacity', 0);
+      if (t >= HOLD) {
+        if (active < steps.length - 1) phase = 'travel';
+        else setActive(0);   // after the last step, start again from 1
+        phaseStart = now;
+      }
+    } else {
+      var k = Math.min(t / TRAVEL, 1);
+      var y0 = centres[active] + r + GAP, y1 = centres[active + 1] - r - GAP - 8;
+      dot.setAttribute('y', y0 + (y1 - y0) * ease(k));
+      dot.setAttribute('opacity', Math.min(1, k / .12, (1 - k) / .12).toFixed(3));
+      if (k >= 1) { setActive(active + 1); phase = 'hold'; phaseStart = now; }
+    }
+    if (visible && !reduce.matches) raf = requestAnimationFrame(frame);
+  }
+
+  function start() {
+    if (raf || reduce.matches || !visible) return;
+    phaseStart = 0;   // resume the current phase from its beginning
+    raf = requestAnimationFrame(frame);
+  }
+  function stop() { if (raf) cancelAnimationFrame(raf); raf = 0; }
+
+  // Only run while the section is on screen
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (entries) {
+      visible = entries[0].isIntersecting;
+      if (visible) start(); else stop();
+    }, { threshold: .2 }).observe(list);
+  } else { visible = true; }
+
+  var resizeTimer;
+  window.addEventListener('resize', function () { clearTimeout(resizeTimer); resizeTimer = setTimeout(measure, 150); });
+  window.addEventListener('load', measure);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+  if (reduce.addEventListener) reduce.addEventListener('change', function () { if (reduce.matches) stop(); else start(); });
+  measure();
+  start();
+})();

@@ -1946,3 +1946,153 @@ textarea.support-input { min-height: 140px; resize: vertical; }
   .globe-hub span:last-child { font-size: 12px; }
 }
 @media (prefers-reduced-motion: reduce) { .globe-sparkles > svg { animation: none; } }
+
+/* =========================================================
+   SOLUTIONS PAGE: pinned card rail.
+   The pin sticks below the header. While pinned, the heading squashes shut from top and bottom,
+   then the card row slides right to left; scrolling back up plays it in reverse (js/main.js sets
+   the section height, --sol-head and the track offset).
+   Cards are light by default and turn dark and lift on hover.
+   ========================================================= */
+.sol-rail { --sol-top: 128px; position: relative; padding: 72px 0 136px; background: #ffffff; }
+.sol-rail-pin {
+  position: sticky; top: var(--sol-top);
+  display: flex; flex-direction: column;
+  min-height: calc(100vh - var(--sol-top));
+  min-height: calc(100svh - var(--sol-top));
+}
+
+/* Heading: its box shrinks to nothing while the text stays centred, so it clips from both edges at once */
+.sol-rail-head { position: relative; overflow: hidden; }
+.sol-rail-head-inner { padding-bottom: 48px; }
+.sol-rail.is-pinned .sol-rail-head { height: var(--sol-head, auto); }
+.sol-rail.is-pinned .sol-rail-head-inner {
+  position: absolute; left: var(--gutter); right: var(--gutter); top: 50%;
+  transform: translateY(-50%) scaleY(var(--sol-head-scale, 1));
+  opacity: var(--sol-head-fade, 1);
+}
+.sol-rail-eyebrow { margin: 0 0 12px; }
+.sol-rail-title { max-width: none; font-size: clamp(30px, 3.6vw, 52px); line-height: 1.25; }
+.sol-rail-line { display: block; }
+.sol-rail-line--2 { padding-left: 1.6em; }
+.sol-rail-muted { color: #9a9a9a; }
+
+/* Card row: starts in line with the container, overflow is clipped (room left above for the hover lift) */
+.sol-rail-viewport { overflow: hidden; padding: 16px 0 40px; margin-top: -16px; }
+.sol-rail-track {
+  --sol-edge: max(var(--gutter), calc((100vw - var(--container)) / 2 + var(--gutter)));
+  display: flex; gap: 16px;
+  width: max-content;
+  margin: 0; padding: 0 var(--sol-edge); list-style: none;
+  will-change: transform;
+}
+
+.sol-card {
+  display: flex; flex-direction: column;
+  flex: 0 0 auto;
+  width: clamp(290px, 28vw, 400px);
+  height: clamp(480px, calc(100svh - var(--sol-top) - 96px), 560px);
+  padding: 24px 24px 0;
+  border-radius: 16px;
+  background: #f6f6f6;
+  overflow: hidden;
+  transition: background .35s ease, transform .35s cubic-bezier(.3, .7, .2, 1), box-shadow .35s ease;
+}
+.sol-card-icon { flex: none; width: 44px; height: 44px; color: #464646; transition: color .35s ease; }
+.sol-card-title { margin: 22px 0 10px; font-family: var(--font-body); font-size: 21px; font-weight: 400; line-height: 1.3; color: #272727; transition: color .35s ease; }
+.sol-card-desc { margin: 0 0 24px; font-family: var(--font-body); font-size: 17.5px; line-height: 1.55; color: #464646; transition: color .35s ease; }
+.sol-card-media { flex: 1 1 auto; min-height: 140px; margin: auto -24px 0; border-radius: 16px; overflow: hidden; }
+.sol-card-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+.sol-card:hover {
+  background: #262626;
+  transform: translateY(-12px);
+  box-shadow: 0 24px 40px -18px rgba(0, 0, 0, .35);
+}
+.sol-card:hover .sol-card-icon, .sol-card:hover .sol-card-title { color: #ffffff; }
+.sol-card:hover .sol-card-desc { color: #bdbdbd; }
+
+@media (max-width: 860px) {
+  .sol-rail { --sol-top: 96px; padding: 48px 0 88px; }
+  .sol-rail-head-inner { padding-bottom: 32px; }
+  .sol-rail-line--2 { padding-left: 0; }
+  .sol-card { width: min(300px, 80vw); height: clamp(440px, calc(100svh - var(--sol-top) - 72px), 520px); }
+  .sol-card-desc { font-size: 16px; }
+}
+
+/* Reduced motion: no pinning or scroll-driven movement; the row scrolls sideways by itself */
+@media (prefers-reduced-motion: reduce) {
+  .sol-rail-pin { position: static; min-height: 0; }
+  .sol-rail-viewport { overflow-x: auto; }
+  .sol-rail-track { transform: none !important; }
+  .sol-card, .sol-card-icon, .sol-card-title, .sol-card-desc { transition: none; }
+  .sol-card:hover { transform: none; }
+}
+
+/* =========================================================
+   SOLUTIONS PAGE: how it works.
+   Each row is photo | numbered marker | text. js/main.js draws the dashed line through the markers
+   (same dashes and orange 4x8 marker as the home page route) and moves the marker from step to step;
+   the step it reaches gets .is-active: orange number, full-colour photo, dark text.
+   ========================================================= */
+.hiw { padding: 0 0 136px; background: #ffffff; }
+.hiw-head { margin-bottom: 56px; }
+.hiw-head .eyebrow { margin: 0 0 8px; }
+
+.hiw-steps { position: relative; display: grid; gap: 24px; margin: 0; padding: 0; list-style: none; }
+.hiw-step {
+  position: relative; z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 420px) 44px minmax(0, 1fr);
+  align-items: center;
+  gap: 0 32px;
+}
+.hiw-media { aspect-ratio: 420 / 220; border-radius: 16px; overflow: hidden; background: #f6f6f6; }
+.hiw-media img {
+  display: block; width: 100%; height: 100%; object-fit: cover;
+  filter: grayscale(1); opacity: .55;
+  transition: filter .6s ease, opacity .6s ease;
+}
+.hiw-num {
+  display: flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px; border-radius: 50%;
+  border: 1px solid #cdcdcd; background: #ffffff;
+  font-family: var(--font-head); font-size: 17px; font-weight: 600; color: #606060;
+  transition: background .4s ease, border-color .4s ease, color .4s ease, box-shadow .4s ease;
+}
+.hiw-text { max-width: 520px; }
+.hiw-title { margin: 0 0 8px; font-family: var(--font-body); font-size: 24px; font-weight: 600; line-height: 1.3; color: #9a9a9a; transition: color .4s ease; }
+.hiw-desc { margin: 0; font-family: var(--font-body); font-size: 18px; line-height: 1.5; color: #9a9a9a; transition: color .4s ease; }
+
+.hiw-step.is-active .hiw-media img { filter: none; opacity: 1; }
+.hiw-step.is-active .hiw-num { background: #fd5202; border-color: #fd5202; color: #ffffff; box-shadow: 0 0 0 6px rgba(253, 82, 2, .14); }
+.hiw-step.is-active .hiw-title { color: #272727; }
+.hiw-step.is-active .hiw-desc { color: #464646; }
+
+/* Dashed line and moving marker, drawn behind the number circles */
+.hiw-line { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.hiw-line-track { fill: none; stroke: #cdcdcd; stroke-width: 1; stroke-dasharray: 5 6; }
+.hiw-line-dot { fill: #fd5202; }
+
+@media (max-width: 1024px) {
+  .hiw-step { grid-template-columns: minmax(0, 300px) 44px minmax(0, 1fr); gap: 0 24px; }
+}
+/* Phone: photos drop out, the steps keep their marker line */
+@media (max-width: 860px) {
+  .hiw { padding-bottom: 88px; }
+  .hiw-head { margin-bottom: 36px; }
+  .hiw-steps { gap: 40px; }
+  .hiw-step { grid-template-columns: 44px minmax(0, 1fr); align-items: start; gap: 0 20px; }
+  .hiw-media { display: none; }
+  .hiw-title { font-size: 21px; margin-top: 8px; }
+  .hiw-desc { font-size: 17px; }
+}
+/* Reduced motion: nothing moves; every step is shown lit */
+@media (prefers-reduced-motion: reduce) {
+  .hiw-line-dot { display: none; }
+  .hiw-media img, .hiw-num, .hiw-title, .hiw-desc { transition: none; }
+  .hiw-step .hiw-media img { filter: none; opacity: 1; }
+  .hiw-step .hiw-num { background: #fd5202; border-color: #fd5202; color: #ffffff; box-shadow: none; }
+  .hiw-step .hiw-title { color: #272727; }
+  .hiw-step .hiw-desc { color: #464646; }
+}
