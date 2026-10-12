@@ -1766,3 +1766,183 @@ html { scroll-padding-top: 90px; }
 @media (prefers-reduced-motion: reduce) {
   .svc-media img, .svc-hover-inner { transition: none; transform: none !important; }
 }
+
+/* =========================================================
+   SUPPORT PAGE: same short banner as Services; the form card rises into it and runs down the page
+   ========================================================= */
+/* Row 1 is the banner; the form layer spans both rows, so row 2 only takes whatever the card hangs below the banner */
+.support-top { display: grid; grid-template-rows: auto 1fr; }
+.support-top > .about-hero { grid-area: 1 / 1; }
+.support-top > .support { grid-area: 1 / 1 / 3 / 2; }
+/* Top padding matches the banner's, so the card's top edge lines up with the "Customer Support" label */
+.support { position: relative; z-index: 2; padding: clamp(120px, 11.5vw, 170px) 0 120px; pointer-events: none; }
+.support-card { pointer-events: auto; }
+.support-inner { display: flex; justify-content: flex-end; }
+/* Keep the banner copy clear of the raised form card on the right */
+@media (min-width: 961px) { .page-support .about-hero-copy { max-width: calc(100% - 540px - 48px); } }
+.support-hero-desc { max-width: 44ch; margin: 20px 0 0; font-size: 18px; line-height: 1.6; color: rgba(255, 255, 255, .88); }
+
+.support-card {
+  width: 100%; max-width: 540px;
+  display: flex; flex-direction: column; gap: 22px;
+  padding: clamp(24px, 3vw, 40px);
+  border-radius: 16px;
+  background: #ffffff;
+  color: #272727;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .14);
+}
+.support-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.support-field { display: flex; flex-direction: column; gap: 8px; }
+.support-field label { font-family: var(--font-body); font-size: 15px; font-weight: 500; color: #464646; }
+.support-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: #f6f6f6;
+  font: 16px/1.4 var(--font-body);
+  color: #272727;
+  transition: border-color .2s ease, background .2s ease;
+}
+.support-input::placeholder { color: #9a9a9a; }
+.support-input:focus { outline: none; border-color: var(--orange); background: #ffffff; }
+.support-input.has-error { border-color: #d92d20; }
+textarea.support-input { min-height: 140px; resize: vertical; }
+.support-msg { margin: -8px 0 0; font-size: 14px; color: #d92d20; }
+.support-msg:empty { display: none; }
+.support-msg.is-ok { color: #16803c; }
+.support-submit { align-self: flex-start; padding: 14px 36px; font-size: 16px; }
+
+@media (max-width: 960px) {
+  .support-top { display: block; }
+  .support { padding: 0 0 88px; }
+  .support-card { max-width: none; }
+}
+@media (max-width: 520px) {
+  .support-row { grid-template-columns: 1fr; }
+  .support-submit { align-self: stretch; }
+}
+
+/* =========================================================
+   SUPPORT PAGE: contact options, four cards in a row (same surface as the home page service cards)
+   ========================================================= */
+.support { padding-bottom: 132px; }
+.contact-options { padding: 0 0 84px; }
+.page-support .network { padding-bottom: 60px; }
+.contact-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin: 0; padding: 0; list-style: none; }
+.contact-card {
+  display: flex; flex-direction: column; height: 100%; min-height: 176px;
+  padding: 22px;
+  border-radius: 16px;
+  background: #f6f6f6;
+  color: #464646;
+  transition: background .2s ease;
+}
+.contact-card:hover { background: #ededed; }
+.contact-icon {
+  align-self: flex-end;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px;
+  margin-bottom: auto;
+  border-radius: 10px;
+  background: #fff1ea; color: #fd5202;
+  transition: background .2s ease, color .2s ease;
+}
+.contact-card:hover .contact-icon, .contact-card:focus-visible .contact-icon { background: #fd5202; color: #ffffff; }
+.contact-title { margin: 20px 0 6px; font-family: var(--font-body); font-size: 22px; font-weight: 600; color: #464646; }
+.contact-line { display: inline-flex; align-items: center; gap: 8px; min-width: 0; font-family: var(--font-body); font-size: 17px; color: #606060; overflow-wrap: anywhere; }
+.contact-go { flex: none; transition: transform .2s ease, color .2s ease; }
+.contact-card:hover .contact-go, .contact-card:focus-visible .contact-go { color: #fd5202; transform: translateX(3px); }
+
+@media (max-width: 1024px) { .contact-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 960px) {
+  .support { padding-bottom: 96px; }
+  .contact-options { padding-bottom: 64px; }
+  .page-support .network { padding-bottom: 40px; }
+}
+@media (max-width: 520px) {
+  .contact-grid { grid-template-columns: 1fr; }
+  .contact-card { min-height: 0; }
+  .contact-title { margin-top: 12px; font-size: 20px; }
+}
+@media (prefers-reduced-motion: reduce) { .contact-go { transition: none; } }
+
+/* =========================================================
+   NETWORK: top of a rotating globe with hub cards, clouds and sparkles.
+   The globe and pins are drawn on the canvas by js/main.js, which also sets --globe-r / --globe-top
+   ========================================================= */
+.network { position: relative; overflow: hidden; padding: 16px 0 0; background: #ffffff; }
+
+.globe { --globe-r: 520px; --globe-top: 80px; position: relative; height: clamp(340px, 36vw, 520px); }
+.globe-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+/* Warm glow behind the top-left shoulder of the globe */
+.globe-sun {
+  position: absolute;
+  left: calc(50% - var(--globe-r) * .78); top: calc(var(--globe-top) - var(--globe-r) * .18);
+  width: calc(var(--globe-r) * .9); aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 196, 87, .55) 0%, rgba(255, 196, 87, .22) 40%, rgba(255, 196, 87, 0) 70%);
+  pointer-events: none;
+}
+
+.globe-clouds img {
+  position: absolute; left: 0; top: 0; height: auto;
+  filter: drop-shadow(10px 12px 0 rgba(39, 39, 39, .08));
+  will-change: transform;
+}
+
+.globe-sparkles > svg:not([width]) {
+  position: absolute;
+  left: calc(50% + var(--globe-r) * var(--x)); top: calc(var(--globe-top) + var(--globe-r) * var(--y));
+  width: var(--size); height: var(--size);
+  margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);
+  overflow: visible;
+  fill: #ffffff; stroke: #262626; stroke-width: 1.25px; stroke-linejoin: round;
+  animation: globe-twinkle 3.6s ease-in-out infinite;
+}
+@keyframes globe-twinkle {
+  0%, 100% { opacity: .9; transform: scale(1); }
+  50% { opacity: .35; transform: scale(.7); }
+}
+
+/* Hub cards: JS places each one above its pin and fades it with the globe's turn */
+.globe-hubs { margin: 0; padding: 0; list-style: none; }
+.globe-hub {
+  position: absolute; left: 0; top: 0; z-index: 2;
+  display: grid; grid-template-columns: auto auto; column-gap: 8px; align-items: center;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .08), 0 0 0 1px rgba(0, 0, 0, .04);
+  font-family: var(--font-body); white-space: nowrap;
+  opacity: 0;
+  transition: opacity .35s ease;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+.globe-hub::after {
+  content: ""; position: absolute; left: 50%; bottom: -5px;
+  width: 10px; height: 10px; margin-left: -5px;
+  background: #ffffff; transform: rotate(45deg);
+  box-shadow: 2px 2px 3px rgba(0, 0, 0, .04);
+}
+.globe-hub-code {
+  grid-row: span 2;
+  padding: 3px 6px; border-radius: 6px;
+  background: #fff1ea; color: #fd5202;
+  font-size: 11px; font-weight: 700; letter-spacing: .04em;
+}
+.globe-hub strong { font-size: 15px; font-weight: 600; line-height: 1.2; color: #272727; }
+.globe-hub span:last-child { font-size: 13px; line-height: 1.3; color: #606060; }
+
+/* Soft fade into the page at the bottom edge */
+.globe-fade { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; height: 32%; background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #ffffff 85%); pointer-events: none; }
+
+@media (max-width: 860px) {
+  .globe { height: clamp(300px, 72vw, 420px); }
+  .globe-hub { padding: 8px 10px; }
+  .globe-hub strong { font-size: 14px; }
+  .globe-hub span:last-child { font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) { .globe-sparkles > svg { animation: none; } }

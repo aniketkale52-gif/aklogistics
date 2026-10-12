@@ -741,3 +741,172 @@
   window.addEventListener('resize', function () { window.requestAnimationFrame(layout); });
   layout();
 })();
+
+/* ---------- Support page: contact form validation ---------- */
+(function () {
+  'use strict';
+  var form = document.getElementById('supportForm');
+  if (!form) return;
+  var msg = document.getElementById('supportMsg');
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var bad = [];
+    form.querySelectorAll('[required]').forEach(function (el) {
+      var v = el.value.trim();
+      var ok = el.type === 'email' ? /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) : v !== '';
+      el.classList.toggle('has-error', !ok);
+      if (!ok) bad.push(el);
+    });
+    msg.classList.toggle('is-ok', !bad.length);
+    if (bad.length) {
+      msg.textContent = 'Please fill in your first name, a valid email and a message.';
+      bad[0].focus();
+      return;
+    }
+    // TODO: connect to the support inbox / ticketing service
+    msg.textContent = 'Thanks! Your message is ready to send (not connected yet).';
+    form.reset();
+  });
+  form.addEventListener('input', function (e) { e.target.classList.remove('has-error'); });
+})();
+
+/* ---------- Network globe: top of a slowly rotating globe, hub pins with cards, drifting clouds ---------- */
+(function () {
+  'use strict';
+  var stage = document.getElementById('globe');
+  if (!stage) return;
+  var canvas = stage.querySelector('.globe-canvas');
+  var ctx = canvas.getContext('2d');
+  var RAD = Math.PI / 180;
+  var TILT = -15 * RAD;   // seen from slightly below the equator, so the parallels arch over the top
+  var SPEED = 5;          // degrees per second; the surface moves left to right
+  var LON0 = 72 * RAD;    // start with India facing the viewer
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var hubs = Array.prototype.map.call(stage.querySelectorAll('.globe-hub'), function (el) {
+    return { el: el, lat: +el.dataset.lat * RAD, lon: +el.dataset.lon * RAD };
+  });
+  var clouds = Array.prototype.map.call(stage.querySelectorAll('.globe-clouds img'), function (el) {
+    return { el: el, d: +el.dataset.d, x: +el.dataset.x, base: +el.dataset.w, w: 0, speed: +el.dataset.speed };
+  });
+
+  var W = 0, H = 0, R = 0, cx = 0, cy = 0, dpr = 1;
+  function resize() {
+    W = stage.clientWidth; H = stage.clientHeight;
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+    var top = W < 700 ? 56 : 80;
+    R = Math.min(W * (W < 700 ? .54 : .32), (H - top) / .85);
+    cx = W / 2; cy = top + R;
+    stage.style.setProperty('--globe-r', R + 'px');
+    stage.style.setProperty('--globe-top', top + 'px');
+    // Clouds shrink on narrow screens; card sizes are cached for the overlap check
+    var scale = Math.max(.5, Math.min(1, W / 1280));
+    clouds.forEach(function (c) { c.w = c.base * scale; c.el.style.width = c.w + 'px'; });
+    hubs.forEach(function (h) { h.w = h.el.offsetWidth; h.h = h.el.offsetHeight; });
+  }
+
+  // Orthographic projection centred on (TILT, lon0): x right, y up, z towards the viewer
+  var sinT = Math.sin(TILT), cosT = Math.cos(TILT);
+  function project(lat, lon, lon0) {
+    var cl = Math.cos(lat), d = lon - lon0;
+    return {
+      x: cx + R * cl * Math.sin(d),
+      y: cy - R * (cosT * Math.sin(lat) - sinT * cl * Math.cos(d)),
+      z: sinT * Math.sin(lat) + cosT * cl * Math.cos(d)
+    };
+  }
+
+  // Trace a polyline, lifting the pen wherever it passes behind the globe
+  function line(points) {
+    var pen = false;
+    for (var i = 0; i < points.length; i++) {
+      var p = points[i];
+      if (p.z > 0) { if (pen) ctx.lineTo(p.x, p.y); else ctx.moveTo(p.x, p.y); pen = true; }
+      else pen = false;
+    }
+  }
+
+  function draw(lon0, t) {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+
+    // Disc, lit from the upper left
+    var g = ctx.createRadialGradient(cx - R * .35, cy - R * .45, R * .1, cx - R * .1, cy - R * .1, R * 1.15);
+    g.addColorStop(0, '#fbf9f7'); g.addColorStop(.55, '#f5f1ee'); g.addColorStop(.85, '#ebe5e0'); g.addColorStop(1, '#e0d8d2');
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fillStyle = g; ctx.fill();
+
+    // Graticule every 20 degrees
+    ctx.beginPath();
+    var lat, lon, pts;
+    for (lon = -180; lon < 180; lon += 20) {
+      pts = [];
+      for (lat = -90; lat <= 90; lat += 3) pts.push(project(lat * RAD, lon * RAD, lon0));
+      line(pts);
+    }
+    for (lat = -80; lat <= 80; lat += 20) {
+      pts = [];
+      for (lon = -180; lon <= 180; lon += 3) pts.push(project(lat * RAD, lon * RAD, lon0));
+      line(pts);
+    }
+    ctx.strokeStyle = 'rgba(39, 39, 39, .42)'; ctx.lineWidth = 1; ctx.stroke();
+
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(39, 39, 39, .7)'; ctx.lineWidth = 1.25; ctx.stroke();
+
+    // Pins with a soft pulsing halo; cards fade in as their pin turns towards the viewer.
+    // Front-most hubs claim their card space first; a card that would overlap one of them waits its turn.
+    var pulse = (Math.sin(t / 600) + 1) / 2;
+    var shown = [];
+    hubs.map(function (h) { return { h: h, p: project(h.lat, h.lon, lon0) }; })
+      .sort(function (m, n) { return n.p.z - m.p.z; })
+      .forEach(function (m) {
+      var h = m.h, p = m.p;
+      var a = Math.max(0, Math.min(1, (p.z - .15) / .25));
+      if (p.y > H - 48) a = 0;   // pin has sunk into the bottom fade
+      var box = { x: p.x - h.w / 2 - 6, y: p.y - 16 - h.h - 6, w: h.w + 12, h: h.h + 12 };
+      var card = a > 0 && !shown.some(function (b) { return box.x < b.x + b.w && b.x < box.x + box.w && box.y < b.y + b.h && b.y < box.y + box.h; });
+      if (card) shown.push(box);
+      if (a > 0) {
+        ctx.beginPath(); ctx.arc(p.x, p.y, 10 + pulse * 6, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(253, 82, 2, ' + (.16 * a) + ')'; ctx.fill();
+        ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(253, 82, 2, ' + a + ')'; ctx.fill();
+        ctx.lineWidth = 1.5; ctx.strokeStyle = 'rgba(255, 255, 255, ' + a + ')'; ctx.stroke();
+      }
+      h.el.style.opacity = card ? a : 0;
+      h.el.style.transform = 'translate(' + p.x.toFixed(1) + 'px,' + p.y.toFixed(1) + 'px) translate(-50%, calc(-100% - 16px))';
+    });
+
+    // Clouds drift right along a lane across the globe, poking just past the rim at each end,
+    // and fade at the ends of the lane so they never pop in or out
+    clouds.forEach(function (c) {
+      var y = cy - R + c.d * R;
+      var half = R * Math.sqrt(1 - (1 - c.d) * (1 - c.d)) + c.w * .3;
+      var len = half * 2;
+      var pos = ((c.x * len + c.speed * t / 1000) % len + len) % len;
+      var edge = Math.min(pos, len - pos);
+      c.el.style.opacity = Math.min(1, edge / (c.w * .8)).toFixed(3);
+      c.el.style.transform = 'translate(' + (cx - half + pos).toFixed(1) + 'px,' + y.toFixed(1) + 'px) translate(-50%, -50%)';
+    });
+  }
+
+  // Animation clock that only advances while the globe is on screen
+  var elapsed = 0, last = 0, running = false, raf = 0;
+  function render() { draw(LON0 - SPEED * RAD * elapsed / 1000, elapsed); }
+  function frame(now) {
+    elapsed += Math.min(now - last, 100);
+    last = now;
+    render();
+    if (running) raf = requestAnimationFrame(frame);
+  }
+  function play() { if (running || reduced) return; running = true; last = performance.now(); raf = requestAnimationFrame(frame); }
+  function pause() { running = false; cancelAnimationFrame(raf); }
+
+  resize();
+  render();
+  if ('ResizeObserver' in window) new ResizeObserver(function () { resize(); render(); }).observe(stage);
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (entries) { if (entries[0].isIntersecting) play(); else pause(); }).observe(stage);
+  } else play();
+})();
