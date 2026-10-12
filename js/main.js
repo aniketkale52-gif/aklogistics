@@ -498,9 +498,14 @@
   var footer = document.querySelector('.site-footer');
   var header = document.querySelector('.site-header');
   if (footer && header && 'IntersectionObserver' in window) {
+    // Keep the header at the very top, so short pages whose footer is already on screen still show it
+    var footerOn = false;
+    var update = function () { header.classList.toggle('is-hidden', footerOn && window.scrollY > 0); };
     new IntersectionObserver(function (entries) {
-      header.classList.toggle('is-hidden', entries[0].isIntersecting);
+      footerOn = entries[0].isIntersecting;
+      update();
     }, { rootMargin: '0px 0px -35% 0px' }).observe(footer);
+    window.addEventListener('scroll', update, { passive: true });
   }
   var form = document.getElementById('footerNews');
   if (form) {

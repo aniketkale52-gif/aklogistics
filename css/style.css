@@ -1683,3 +1683,86 @@ html { scroll-padding-top: 90px; }
   .jr-chapter { transition: opacity .2s linear; transform: none; }
 }
 .jr-hint { transition: opacity .3s ease; }
+
+/* =========================================================
+   SERVICES PAGE: same banner as About, without the raised photo
+   ========================================================= */
+/* No raised photo under this banner, so drop the space reserved for it */
+.services-hero { --about-overlap: 0px; }
+
+/* =========================================================
+   SERVICES PAGE: service cards, two per row.
+   The frame holds only the photo; meta, title and description sit underneath.
+   ========================================================= */
+.svc-list { padding: 24px 0 136px; }
+.svc-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 64px 24px;
+  margin: 0; padding: 0; list-style: none;
+}
+.svc-link { display: block; color: inherit; text-decoration: none; }
+
+.svc-frame { padding: 8px; border-radius: 16px; background: #f6f6f6; }
+.svc-frame-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 4px 8px 12px;
+}
+.svc-frame-label { font-size: 14px; font-weight: 600; color: #fd5202; }
+.svc-frame-mark { width: 20px; height: 18px; color: #272727; }
+
+.svc-media {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+  border-radius: 12px;
+  background: #dedede;
+}
+.svc-media img {
+  display: block; width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform 1.4s cubic-bezier(.2, .6, .2, 1);
+}
+
+/* Hover: the whole photo turns orange and shows "View more" */
+.svc-hover {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0, 0, 0, .35);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  transition: opacity .35s ease;
+}
+.svc-hover-inner {
+  padding: 14px 32px;
+  font-size: 16px;
+  transform: translateY(10px);
+  transition: transform .45s cubic-bezier(.2, .6, .2, 1);
+}
+.svc-link:hover .svc-hover,
+.svc-link:focus-visible .svc-hover { opacity: 1; }
+.svc-link:hover .svc-hover-inner,
+.svc-link:focus-visible .svc-hover-inner { transform: none; }
+.svc-link:hover .svc-media img,
+.svc-link:focus-visible .svc-media img { transform: scale(1.06); }
+.svc-link:focus-visible { outline: none; }
+.svc-link:focus-visible .svc-frame { box-shadow: 0 0 0 2px #fd5202; }
+
+.svc-meta { margin: 20px 0 8px; font-size: 16px; color: #606060; }
+.svc-meta-dot { margin: 0 8px; }
+.svc-title { margin: 0 0 8px; font-family: var(--font-body); font-size: 24px; font-weight: 600; line-height: 1.3; color: #272727; }
+.svc-desc { margin: 0; max-width: 52ch; font-size: 18px; line-height: 1.5; color: #464646; }
+
+@media (max-width: 860px) {
+  .svc-list { padding: 8px 0 88px; }
+  .svc-grid { gap: 48px 16px; }
+  .svc-title { font-size: 21px; }
+  .svc-desc { font-size: 17px; }
+}
+@media (max-width: 600px) {
+  .svc-grid { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .svc-media img, .svc-hover-inner { transition: none; transform: none !important; }
+}
