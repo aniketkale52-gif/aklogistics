@@ -102,7 +102,9 @@ button { cursor: pointer; }
 .logo-mark { width: 28px; height: 26px; }
 .logo-text { font-family: var(--font-head); font-size: 25px; font-weight: 400; letter-spacing: .2px; }
 
-.main-nav { display: flex; gap: 26px; margin-right: auto; margin-left: clamp(40px, 18vw, 250px); }
+/* No side margins: the header row spaces logo, nav and actions evenly, so the gap from the logo to the links
+   matches the gap from the links to Track / Sign In */
+.main-nav { display: flex; gap: 26px; margin: 0; }
 .main-nav a { font-size: 13px; opacity: .92; transition: opacity .2s, color .2s; }
 .main-nav a:hover { opacity: 1; color: var(--orange); }
 
@@ -229,7 +231,7 @@ button { cursor: pointer; }
    Responsive
    ========================================================= */
 @media (max-width: 1024px) {
-  .main-nav { margin-left: 32px; gap: 20px; }
+  .main-nav { gap: 20px; }
   .hero-inner { grid-template-columns: minmax(0, 1fr) 400px; gap: 32px; padding-top: 64px; }
   .hero-copy { padding-left: 0; }
 }
