@@ -667,7 +667,9 @@
     var w = stage.clientWidth, h = stage.clientHeight, narrow = w < 861;
     L.w = w; L.h = h;
     L.s = Math.min(h / 900, w / (narrow ? 700 : 1000));          // world units -> px
-    L.truckScreen = w * (narrow ? 0.08 : 0.16);                    // rear of the truck on screen
+    // Rear of the truck on screen: lined up with the left edge of the chapter label / title, nudged a little to the right
+    var copyLeft = chapters[0].getBoundingClientRect().left - stage.getBoundingClientRect().left;
+    L.truckScreen = copyLeft + (narrow ? 12 : 32);
     L.tipScreen = w + 40;                                          // drawing happens just off the right edge, so art slides in whole
     L.lead = (L.tipScreen - L.truckScreen) / L.s;                  // pen distance ahead of the truck
     L.ty = h * (narrow ? 0.8 : 0.78) - GROUND * L.s;               // ground line sits ~78% down

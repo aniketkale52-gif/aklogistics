@@ -1523,7 +1523,7 @@ html { scroll-padding-top: 90px; }
   background: #dedede;
   box-shadow: 0 24px 60px rgba(0, 0, 0, .18), 0 6px 18px rgba(0, 0, 0, .08);
 }
-.about-photo-frame img { width: 100%; height: 100%; object-fit: cover; }
+.about-photo-frame img { width: 100%; height: 100%; object-fit: cover; object-position: center 65%; }
 
 /* =========================================================
    ABOUT PAGE: team grid
