@@ -1031,10 +1031,11 @@ html { scroll-padding-top: 90px; }
 @media (max-width: 1024px) { .hero-copy { padding-left: 0; } .order-card { margin-left: 0; } }
 @media (max-width: 860px) { .hero-inner { padding-top: 40px; padding-bottom: 96px; } .order-card { margin-top: 28px; } }
 
-/* Hero: a little taller for more breathing room */
-.hero-inner { padding-top: 104px; padding-bottom: 210px; }
-.hero::after { height: 240px; }
-@media (max-width: 860px) { .hero-inner { padding-top: 56px; padding-bottom: 120px; } .hero::after { height: 140px; } }
+/* Hero: compact enough that the headline and Track / Ship card fit in a laptop's first view */
+.hero { min-height: 0; }
+.hero-inner { padding-top: 64px; padding-bottom: 110px; }
+.hero::after { height: 150px; }
+@media (max-width: 860px) { .hero-inner { padding-top: 40px; padding-bottom: 80px; } .hero::after { height: 110px; } }
 
 /* Track / Ship card: the unselected tab is frosted glass over the hero image, the selected tab is white */
 .order-card { background: transparent; box-shadow: none; border-radius: 0; }
