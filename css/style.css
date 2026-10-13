@@ -1679,6 +1679,9 @@ html { scroll-padding-top: 90px; }
   color: #ffffff;
 }
 .jr-text { max-width: 46ch; margin: 30px 0 0; font-family: var(--font-body); font-size: clamp(17px, 1.4vw, 20px); line-height: 1.6; color: rgba(255, 255, 255, .88); }
+/* Description sits flush with the right edge of the copy grid, the same edge each drawing settles against,
+   so the text and the drawing below it read as one column (left and right margins match) */
+.jr-text { justify-self: end; width: 100%; max-width: 32em; }
 
 /* Bottom bar: chapter count, progress, hint */
 .journey-foot {
@@ -1699,7 +1702,7 @@ html { scroll-padding-top: 90px; }
 @media (max-width: 860px) {
   .journey { margin-top: 64px; height: 560vh; }
   .jr-chapter { grid-template-columns: 1fr; gap: 0; top: clamp(40px, 9vh, 80px); }
-  .jr-text { margin-top: 14px; font-size: 16px; }
+  .jr-text { margin-top: 14px; font-size: 16px; justify-self: stretch; max-width: none; }
   .jr-hint { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
