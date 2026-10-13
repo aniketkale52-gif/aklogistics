@@ -873,7 +873,14 @@ html { scroll-padding-top: 90px; }
   -webkit-mask-image: radial-gradient(circle var(--spot-r) at var(--spot-x) var(--spot-y), #000 0%, rgba(0, 0, 0, .55) 45%, transparent 100%);
           mask-image: radial-gradient(circle var(--spot-r) at var(--spot-x) var(--spot-y), #000 0%, rgba(0, 0, 0, .55) 45%, transparent 100%);
 }
-.offices-map-glow { background: radial-gradient(circle calc(var(--spot-r) * 1.4) at var(--spot-x) var(--spot-y), rgba(253, 82, 2, .16), rgba(253, 82, 2, 0) 70%); }
+/* Glow: a round soft light centred on the cursor (not a box-sized layer), so it never shows a straight edge near the map's borders */
+.offices-map-glow {
+  inset: auto; left: var(--spot-x); top: var(--spot-y);
+  width: calc(var(--spot-r) * 2.8); height: calc(var(--spot-r) * 2.8);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle closest-side, rgba(253, 82, 2, .16), rgba(253, 82, 2, 0));
+}
 .offices-map.is-lit .offices-map-lit, .offices-map.is-lit .offices-map-glow { opacity: 1; }
 .office-pins { position: absolute; inset: 0; margin: 0; padding: 0; list-style: none; }
 .office-pin { position: absolute; width: 0; height: 0; }
