@@ -1980,7 +1980,7 @@ textarea.support-input { min-height: 140px; resize: vertical; }
    the section height, --sol-head and the track offset).
    Cards are light by default and turn dark and lift on hover.
    ========================================================= */
-.sol-rail { --sol-top: 128px; position: relative; padding: 72px 0 136px; background: #ffffff; }
+.sol-rail { --sol-top: 128px; position: relative; padding: 72px 0 48px; background: #ffffff; }
 .sol-rail-pin {
   position: sticky; top: var(--sol-top);
   display: flex; flex-direction: column;
@@ -2039,7 +2039,7 @@ textarea.support-input { min-height: 140px; resize: vertical; }
 .sol-card:hover .sol-card-desc { color: #bdbdbd; }
 
 @media (max-width: 860px) {
-  .sol-rail { --sol-top: 96px; padding: 48px 0 88px; }
+  .sol-rail { --sol-top: 96px; padding: 48px 0 32px; }
   .sol-rail-head-inner { padding-bottom: 32px; }
   .sol-rail-line--2 { padding-left: 0; }
   .sol-card { width: min(300px, 80vw); height: clamp(440px, calc(100svh - var(--sol-top) - 72px), 520px); }
@@ -2061,7 +2061,7 @@ textarea.support-input { min-height: 140px; resize: vertical; }
    (same dashes and orange 4x8 marker as the home page route) and moves the marker from step to step;
    the step it reaches gets .is-active: orange number, full-colour photo, dark text.
    ========================================================= */
-.hiw { padding: 0 0 136px; background: #ffffff; }
+.hiw { position: relative; z-index: 1; padding: 0 0 136px; background: #ffffff; }
 .hiw-head { margin-bottom: 56px; }
 .hiw-head .eyebrow { margin: 0 0 8px; }
 

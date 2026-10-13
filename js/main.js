@@ -972,6 +972,7 @@
   function reset() {
     rail.classList.remove('is-pinned');
     rail.style.height = '';
+    rail.style.marginBottom = '';
     pin.style.height = '';
     track.style.transform = '';
   }
@@ -990,6 +991,9 @@
     var pinH = pin.offsetHeight;
     pin.style.height = pinH + 'px';
     rail.style.height = (padTop + pinH + squash + travel + (parseFloat(cs.paddingBottom) || 0)) + 'px';
+    // Once the heading has squashed away, the bottom of the pin (below the cards) is empty: pull the next section
+    // up over it so the gap after the cards is just the section's bottom padding
+    rail.style.marginBottom = -Math.max(0, pinH - viewport.offsetHeight) + 'px';
     rail.classList.add('is-pinned');
     update();
   }
