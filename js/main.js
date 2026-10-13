@@ -471,6 +471,27 @@
     if (e.key === 'Escape') pins.forEach(function (o) { o.classList.remove('is-open'); });
   });
   place();
+
+  // Map spotlight: a soft circle follows the cursor (eased) and lights up the dots under it
+  var map = document.querySelector('.offices-map');
+  if (map && window.matchMedia('(hover: hover)').matches) {
+    var still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var tx = 0, ty = 0, cx = 0, cy = 0, raf = 0;
+    var draw = function () {
+      cx += (tx - cx) * (still ? 1 : 0.2);
+      cy += (ty - cy) * (still ? 1 : 0.2);
+      map.style.setProperty('--spot-x', cx.toFixed(1) + 'px');
+      map.style.setProperty('--spot-y', cy.toFixed(1) + 'px');
+      raf = (Math.abs(tx - cx) > 0.3 || Math.abs(ty - cy) > 0.3) ? requestAnimationFrame(draw) : 0;
+    };
+    map.addEventListener('pointermove', function (e) {
+      var r = map.getBoundingClientRect();
+      tx = e.clientX - r.left; ty = e.clientY - r.top;
+      if (!map.classList.contains('is-lit')) { cx = tx; cy = ty; map.classList.add('is-lit'); }
+      if (!raf) raf = requestAnimationFrame(draw);
+    });
+    map.addEventListener('pointerleave', function () { map.classList.remove('is-lit'); });
+  }
 })();
 
 

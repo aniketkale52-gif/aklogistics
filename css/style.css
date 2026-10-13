@@ -665,7 +665,9 @@ button { cursor: pointer; }
 
 .ts-card { display: flex; flex-direction: column; min-width: 0; padding: 36px; border-radius: 14px; background: #f6f6f6; }
 .ts-logo { align-self: flex-start; margin-bottom: 28px; font-family: var(--font-head); font-size: 15px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: #9a9a9a; }
-.ts-logo img { display: block; height: 28px; width: auto; }
+.ts-logo img { display: block; height: 44px; width: auto; max-width: 180px; object-fit: contain; object-position: left center; }
+/* Portraits: keep the face in frame */
+.ts-photo { background-position: center 18%; }
 .ts-quote { margin: 0 0 32px; max-width: 60ch; font-family: var(--font-body); font-size: 26px; line-height: 1.4; color: #464646; }
 .ts-stat { display: flex; flex-direction: column; gap: 6px; margin: auto 0 0; }
 .ts-stat-num { font-family: var(--font-head); font-size: 46px; font-weight: 600; line-height: 1.1; color: #272727; }
@@ -855,7 +857,22 @@ html { scroll-padding-top: 90px; }
 .offices-desc { margin: 0 auto; max-width: 62ch; font-family: var(--font-body); font-size: 19px; line-height: 1.6; color: #bdbdbd; }
 
 .offices-map { position: relative; max-width: 1180px; margin: 0 auto; }
-.offices-map-img { display: block; width: 100%; height: auto; opacity: .85; }
+/* Dotted map: soft grey on the dark card. On hover a 60px spotlight follows the cursor:
+   a brighter copy of the map shows through a radial mask, with a faint orange glow under it.
+   --spot-x / --spot-y are set in js/main.js */
+.offices-map { --spot-x: 50%; --spot-y: 50%; --spot-r: 60px; }
+.offices-map-img { display: block; width: 100%; height: auto; opacity: .3; }
+.offices-map-lit, .offices-map-glow {
+  position: absolute; inset: 0; pointer-events: none;
+  opacity: 0; transition: opacity .35s ease;
+}
+.offices-map-lit {
+  width: 100%; height: 100%;
+  -webkit-mask-image: radial-gradient(circle var(--spot-r) at var(--spot-x) var(--spot-y), #000 0%, rgba(0, 0, 0, .55) 45%, transparent 100%);
+          mask-image: radial-gradient(circle var(--spot-r) at var(--spot-x) var(--spot-y), #000 0%, rgba(0, 0, 0, .55) 45%, transparent 100%);
+}
+.offices-map-glow { background: radial-gradient(circle calc(var(--spot-r) * 1.4) at var(--spot-x) var(--spot-y), rgba(253, 82, 2, .16), rgba(253, 82, 2, 0) 70%); }
+.offices-map.is-lit .offices-map-lit, .offices-map.is-lit .offices-map-glow { opacity: 1; }
 .office-pins { position: absolute; inset: 0; margin: 0; padding: 0; list-style: none; }
 .office-pin { position: absolute; width: 0; height: 0; }
 
