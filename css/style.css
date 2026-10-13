@@ -1176,6 +1176,21 @@ html { scroll-padding-top: 90px; }
   height: 0; overflow: hidden; visibility: hidden; pointer-events: none;
 }
 
+/* Current page: a short line centred under its nav link (white over the hero, orange once the header turns white).
+   Hovering it grows the line to the full hover width */
+.main-nav a[aria-current="page"] { font-weight: 500; }
+.main-nav a[aria-current="page"]::after {
+  left: 50%; right: auto; width: 18px;
+  transform: translateX(-50%);
+  transition: width .3s ease;
+}
+.main-nav a[aria-current="page"]:hover::after, .main-nav a[aria-current="page"]:focus-visible::after { width: 100%; transform: translateX(-50%); }
+@media (max-width: 860px) {
+  /* Dropdown menu: links are left-aligned, so the marker sits under the start of the label */
+  .main-nav a[aria-current="page"]::after { left: 20px; transform: none; }
+  .main-nav a[aria-current="page"]:hover::after, .main-nav a[aria-current="page"]:focus-visible::after { width: calc(100% - 40px); transform: none; }
+}
+
 /* More breathing room between sections (+40px on desktop, +24px on phones) */
 .partners { padding-bottom: 124px; }
 .why, .solutions, .services, .testimonials, .fleet, .news, .connect { padding-bottom: 136px; }
