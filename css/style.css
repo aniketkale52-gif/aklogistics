@@ -1409,6 +1409,11 @@ html { scroll-padding-top: 90px; }
 .footer-tri { top: 64px; right: 64px; width: min(34vw, 460px); }
 @media (max-width: 860px) { .footer-tri { top: 32px; right: 32px; width: 52vw; } }
 
+/* Footer reveal: the contents start tucked up under the section above (clipped by the footer's top edge)
+   and slide down into place as the page scrolls. --footer-shift is set in js/main.js */
+.footer-tri, .footer-inner { transform: translate3d(0, var(--footer-shift, 0px), 0); will-change: transform; }
+@media (prefers-reduced-motion: reduce) { .footer-tri, .footer-inner { transform: none; will-change: auto; } }
+
 /* =========================================================
    ABOUT PAGE: hero banner with the truck image behind it
    ========================================================= */

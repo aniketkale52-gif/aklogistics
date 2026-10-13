@@ -507,6 +507,24 @@
     }, { rootMargin: '0px 0px -35% 0px' }).observe(footer);
     window.addEventListener('scroll', update, { passive: true });
   }
+  // Reveal: the contents sit shifted up under the section above and catch up with the page as the footer scrolls in
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  if (footer && !reduceMotion.matches) {
+    var ticking = false, last = '';
+    var reveal = function () {
+      ticking = false;
+      var vh = window.innerHeight, rect = footer.getBoundingClientRect();
+      var shift = Math.min(vh < 700 ? 140 : 260, rect.height * 0.35); // how far up the contents start
+      var p = Math.max(0, Math.min(1, (vh - rect.top) / Math.min(vh, rect.height)));
+      var value = (-(1 - p) * shift).toFixed(1) + 'px';
+      if (value !== last) { last = value; footer.style.setProperty('--footer-shift', value); }
+    };
+    var queue = function () { if (!ticking) { ticking = true; requestAnimationFrame(reveal); } };
+    window.addEventListener('scroll', queue, { passive: true });
+    window.addEventListener('resize', queue);
+    reveal();
+  }
+
   var form = document.getElementById('footerNews');
   if (form) {
     var input = document.getElementById('footerEmail'), msg = document.getElementById('footerNewsMsg');
